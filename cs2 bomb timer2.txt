@@ -1,0 +1,65 @@
+This is the program.cs NuGet downloads clickable overlay and MAKE SURE ITS VERSION 9.1.0! and swed64 and put the cpu to 64 bit and change your cpu to 64 in property
+
+
+using BombTimerTutorial;
+using Swed64;
+
+// init swed
+Swed swed = new Swed("cs2");
+
+// get module
+IntPtr client = swed.GetModuleBase("client.dll");
+
+// init render
+Renderer renderer = new Renderer();
+Thread renderThread = new Thread(new ThreadStart(renderer.Start().Wait));
+renderThread.Start();
+
+// offsets
+
+// offsets.cs
+int dwGameRules = 0x1A12418;
+
+// client.dll.cs
+int m_bBombPlanted = 0x9A5;
+
+bool bombPlanted = false; //switch
+
+// timer loop
+
+while (true)
+{
+    // read current
+    IntPtr gameRules = swed.ReadPointer(client, dwGameRules);
+    if (gameRules != IntPtr.Zero)
+    {
+        // get current state of the bomb
+        bombPlanted = swed.ReadBool(gameRules, m_bBombPlanted);
+
+        if (bombPlanted)
+        {
+            for (int i = 0; i < 40; i++) // count 40 seconds from bomb plant
+            {
+                bombPlanted = swed.ReadBool(gameRules, m_bBombPlanted); // refresh
+                if (!bombPlanted) // end loop if bomb is not planted anymore
+                    break;
+
+                // calculate time left
+                int timeLeft = 40 - i;
+
+                // update GUI
+                renderer.timeLeft = timeLeft;
+                renderer.bombPlanted = true;
+
+                Thread.Sleep(1000); // sleep for 1 second
+            }
+        }
+        else
+        {
+            // reset
+            renderer.timeLeft = -1;
+            renderer.bombPlanted = false;
+        }
+        Thread.Sleep(2);
+    }
+}
