@@ -1,0 +1,40 @@
+Renderer.cs Get NuGet clickable overlay and swed64 and put the cpu to 64 bit in property
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+using ClickableTransparentOverlay;
+using ImGuiNET;
+
+namespace BombTimerTutorial
+{
+    public class Renderer : Overlay
+    {
+        // rgba
+        private Vector4 redColor = new Vector4(1, 0, 0, 1); // rgba
+        private Vector4 greenColor = new Vector4(0, 1, 0, 1);
+
+        // bomb variables
+        public bool bombPlanted = false;
+        public int timeLeft = -1;
+
+        protected override void Render()
+        {
+            ImGui.Begin("Bomb timer");
+            if (bombPlanted)
+            {
+                // bomb timer info
+                ImGui.TextColored(greenColor, "Bomb planted");
+                ImGui.Text($"Seconds before boutta blow: {timeLeft}");
+            }
+            else
+            {
+                // default text
+                ImGui.TextColored(redColor, "Bomb is not planted");
+            }
+        }
+    }
+}
